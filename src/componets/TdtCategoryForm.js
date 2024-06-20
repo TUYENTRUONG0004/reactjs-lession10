@@ -1,9 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '../api/TdtApi';
 
-export default function TdtCategoryFrom({ onCloseForm, onCategorySubmit }) {
+export default function TdtCategoryForm({ onCloseForm, onCategorySubmit, renderTdtCategory }) {
+    
+    const [tdtId, setTdtId] = useState(0);
     const [tdtCategoryName, setTdtCategoryName] = useState("");
     const [tdtCategoryStatus, setTdtCategoryStatus] = useState(true);
+
+    useEffect(() => {
+        if (renderTdtCategory) {
+            setTdtId(renderTdtCategory.tdtId);
+            setTdtCategoryName(renderTdtCategory.tdtCategoryName);
+            setTdtCategoryStatus(renderTdtCategory.tdtCategoryStatus);
+        }
+    }, [renderTdtCategory]); // Adding the dependency array here
 
     const tdtHandleClose = () => {
         onCloseForm(false);
@@ -11,13 +21,28 @@ export default function TdtCategoryFrom({ onCloseForm, onCategorySubmit }) {
 
     const tdtHandleSubmit = async (event) => {
         event.preventDefault();
-        let tdtCategory = {
-            tdtId: 0,
-            tdtCategoryName: tdtCategoryName,
-            tdtCategoryStatus: tdtCategoryStatus
-        };
-        console.log("TdtCategory", tdtCategory);
-        await axios.post("TdtCategory", tdtCategory);
+       
+        if (tdtId === 0) {
+            let tdtCategory = {
+                tdtId: 0,
+                tdtCategoryName: tdtCategoryName,
+                tdtCategoryStatus: tdtCategoryStatus
+            };
+            console.log("TdtCategory", tdtCategory);
+            
+            await axios.post("TdtCategory", tdtCategory);
+            onCategorySubmit(tdtCategory);
+        } else {
+            let tdtCategory = {
+                tdtId: tdtId,
+                tdtCategoryName: tdtCategoryName,
+                tdtCategoryStatus: tdtCategoryStatus
+            };
+            console.log("TdtCategory", tdtCategory);
+            
+            await axios.put("TdtCategory", tdtCategory);
+            onCategorySubmit(tdtCategory);
+        }
     }
 
     return (
